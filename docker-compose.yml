@@ -57,7 +57,7 @@ services:
   testapp-mysql:
     image: mysql:8
     networks:
-      - default
+      - testapp-network
     hostname: testapp-mysql
     ports:
       - 13306:3306

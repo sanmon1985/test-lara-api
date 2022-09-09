@@ -1,0 +1,223 @@
+openapi: 3.0.0
+info:
+  title: Test App
+  version: 0.0.1
+servers:
+  - url: http://api.testapp.local
+paths:
+  /api/v1/product:
+    post:
+      tags:
+        - default
+      summary: Create Product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: 'Product #4'
+                price: 55.17
+                is_published: false
+                categories:
+                  - 1
+                  - 2
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Product'
+    get:
+      tags:
+        - default
+      summary: Get Products List
+      parameters:
+        - name: filter[name]
+          in: query
+          schema:
+            type: string
+          example: 'Product #1'
+        - name: filter[category_id]
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: filter[category_name]
+          in: query
+          schema:
+            type: string
+          example: 'Category #1'
+        - name: filter[price_from]
+          in: query
+          schema:
+            type: integer
+          example: '40'
+        - name: filter[price_to]
+          in: query
+          schema:
+            type: integer
+          example: '50'
+        - name: filter[is_published]
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: filter[with_trashed]
+          in: query
+          schema:
+            type: integer
+          example: '1'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+  /api/v1/product/{id}:
+    patch:
+      tags:
+        - default
+      summary: Update Product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Product 0
+                categories:
+                  - 1
+                  - 2
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '5'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Product'
+    delete:
+      tags:
+        - default
+      summary: Delete Product
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '3'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: []
+  /api/v1/category:
+    post:
+      tags:
+        - default
+      summary: Create Category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: 'Category #5'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Category'
+  /api/v1/category/{id}:
+    delete:
+      tags:
+        - default
+      summary: Delete Category
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+          example: '1'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: []
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                error: Category is not empty
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Product 1"
+        price:
+          type: number
+          example: 77.14
+        is_published:
+          type: boolean
+          example: true
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Category 2"
