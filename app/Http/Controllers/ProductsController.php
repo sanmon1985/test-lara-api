@@ -51,6 +51,9 @@ class ProductsController extends Controller
     public function store(ProductRequest $request)
     {
         $product = Product::create($request->validated());
+        if (!empty($request->categories)) {
+            $product->categories()->sync($request->categories);
+        }
         return ProductResource::make($product);
     }
 
@@ -62,7 +65,10 @@ class ProductsController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         if ($product->update($request->validated())) {
-                return ProductResource::make($product);
+            if (!empty($request->categories)) {
+                $product->categories()->sync($request->categories);
+            }
+            return ProductResource::make($product);
         }
 
         return response(['error' => 'Product update failed'], Response::HTTP_BAD_REQUEST);
@@ -70,6 +76,7 @@ class ProductsController extends Controller
 
     public function destroy(Product $product)
     {
-        return $product->delete() ? response([], Response::HTTP_OK) : response(['error' => 'Product deletion failed'], Response::HTTP_BAD_REQUEST);
+        return $product->delete() ? response([], Response::HTTP_OK) : response(['error' => 'Product deletion failed'],
+            Response::HTTP_BAD_REQUEST);
     }
 }

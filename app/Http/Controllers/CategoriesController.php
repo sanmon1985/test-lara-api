@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CategoryRequest;
+use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Response;
@@ -11,7 +12,10 @@ class CategoriesController extends Controller
 {
     public function index()
     {
+        $query = Category::query();
+        $categories = $query->get();
 
+        return CategoryCollection::make($categories);
     }
 
     public function store(CategoryRequest $request)
@@ -33,7 +37,8 @@ class CategoriesController extends Controller
     public function destroy(Category $category)
     {
         if (count($category->products) === 0) {
-            return $category->delete() ? response([], Response::HTTP_OK) : response(['error' => 'Category deletion failed'], Response::HTTP_BAD_REQUEST);
+            return $category->delete() ? response([],
+                Response::HTTP_OK) : response(['error' => 'Category deletion failed'], Response::HTTP_BAD_REQUEST);
         }
 
         return response(['error' => 'Category is not empty'], Response::HTTP_UNPROCESSABLE_ENTITY);

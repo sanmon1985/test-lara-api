@@ -17,7 +17,7 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price' => 'float',
+        'price'        => 'float',
         'is_published' => 'boolean',
     ];
 
