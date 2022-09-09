@@ -1,0 +1,71 @@
+version: "3.8"
+
+networks:
+  testapp-network:
+
+services:
+  # Reverse-proxy для всех сервисов на базе Traefik 2.3
+  testapp-traefik:
+    depends_on:
+      - testapp-backend
+    image: traefik:2.3
+    networks:
+      - testapp-network
+    hostname: testapp-traefik
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 8084
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./.docker/config/traefik/traefik.toml:/etc/traefik/traefik.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik.rule=host(`traefik.local`)"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.service=traefik"
+  # Backend
+  testapp-backend:
+    depends_on:
+      - testapp-mysql
+    build:
+      context: ./.docker
+      dockerfile: ./Dockerfile
+    networks:
+      - testapp-network
+    hostname: testapp-backend
+    volumes:
+      - .:/app
+      - ./.docker/.data/nginx-logs:/var/log/nginx
+      - ./.docker/.data/supervisor-logs:/var/log/supervisor
+      - ./.docker/.cache/composer:/root/.composer
+    ports:
+      - 5553:443
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.testapp-backend.loadbalancer.server.port=443"
+      - "traefik.http.routers.testapp-backend.entrypoints=http"
+      - "traefik.http.routers.testapp-backend.rule=host(`api.testapp.local`)"
+      - "traefik.http.routers.testapp-backend.service=testapp-backend"
+
+  testapp-mysql:
+    image: mysql:8
+    networks:
+      - default
+    hostname: testapp-mysql
+    ports:
+      - 13306:3306
+    environment:
+      - TZ=Europe/Moscow
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=testapp
+      - MYSQL_USER=testapp
+      - MYSQL_PASSWORD=testapp
+    volumes:
+      - ./.docker/.data/testapp/mysql-data:/var/lib/mysql

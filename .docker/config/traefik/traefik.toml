@@ -1,0 +1,23 @@
+[api]
+  dashboard = true
+  insecure = true
+  debug = true
+
+[log]
+  level = "DEBUG"
+  filePath = "/logs/traefik.log"
+
+[accessLog]
+  filePath = "/logs/access.log"
+
+[providers.file]
+  filename = "/etc/traefik/traefik.toml"
+  watch = true
+
+[providers.docker]
+  swarmMode = false
+  exposedByDefault = true
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
